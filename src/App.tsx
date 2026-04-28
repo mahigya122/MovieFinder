@@ -113,7 +113,7 @@ function Moviesearch() {
         </div>
 
         {/* MOVIES GRID */}
-        <div className="flex min-h-screen bg-black">
+        <div className="flex flex-col min-h-screen bg-black">
         <div
           className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-5 p-4 auto-rows-auto
         items-start"> {/*if i place auto-row-fr item-streach then the height of all the card will be same but it will overwrite image hight as well*/}
