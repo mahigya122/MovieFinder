@@ -91,7 +91,7 @@ function Moviesearch() {
       </div>
 
       {/* MAIN LAYOUT */}
-      <div className="flex">
+      <div className="flex min-h-screen bg-gray-100">
 
         {/* for SIDEBAR */}
         <div className="hidden lg:block w-80 p-4 bg-black text-white border-r border-gray-800"> {/*hidden lg:block → only desktop shows sidebar
@@ -113,9 +113,7 @@ function Moviesearch() {
         </div>
 
         {/* MOVIES GRID */}
-        <div className="flex flex-col overflow-hidden rounded-xl
-          bg-[#111] text-white
-           shadow-md">
+        <div className="flex min-h-screen bg-black">
         <div
           className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-5 p-4 auto-rows-auto
         items-start"> {/*if i place auto-row-fr item-streach then the height of all the card will be same but it will overwrite image hight as well*/}
@@ -137,7 +135,7 @@ function Moviesearch() {
               <img
                src={m.Poster}
                alt={m.Title}
-               className="h-60 w-full object-cover"
+               className="w-full object-cover"
                />
               </div>
             
