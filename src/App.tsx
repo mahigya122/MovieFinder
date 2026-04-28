@@ -74,7 +74,7 @@ function Moviesearch() {
         
       <div className="flex w-full items-center justify-between gap-4 bg-gradient-to-r from-gray-800 via-gray-900 to-gray-800 p-4 text-white shadow-lg">
         <h1 className="text-xl font-bold tracking-wide !text-white">
-          🎬 MovieFinder
+          🎬 
         </h1>
 
         <input
@@ -112,23 +112,27 @@ function Moviesearch() {
         {/* MOVIES GRID */}
         <div className="flex-1 p-4 overflow-y-auto bg-gray-100">
         <div
-          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-6 auto-rows-fr items-stretch">
+          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-5 gap-3 auto-rows-auto
+        items-start"> {/*if i place auto-row-fr item-streach then the height of all the card will be same but it will overwrite image hight as well*/}
 
           {movies.map((m: Movie, i: number) => (
             <div
               key={i}
-              className="bg-white rounded-xl shadow-md hover:shadow-xl transition duration-300 overflow-hidden flex flex-col"
+              className="flex h-full flex-col overflow-hidden rounded-lg bg-white shadow-md transition duration-300 hover:shadow-lg w-56 h-80"
             >
+              <div className="aspect-[4/5] w-full bg-gray-100">  {/* aspect ratio helps us maintain consistancy between moviecard and image*/ }
               <img
-                src={m.Poster}
-                alt={m.Title}
-                className="w-full h-44 object-cover"
-              />
+               src={m.Poster}
+               alt={m.Title}
+               className="block h-full w-full object-cover"
+               />
+              </div>
+            
 
-              <div className="p-3">
-                <h2 className="text-lg font-bold truncate">{m.Title}</h2>
-                <p className="text-gray-600">{m.Year}</p>
-                <p className="text-sm text-gray-400">{m.Type}</p>
+              <div className="p-2">
+                <h2 className="truncate text-xs font-semibold">{m.Title}</h2>
+                <p className="text-xs text-gray-600">{m.Year}</p>
+                <p className="text-[11px] text-gray-400">{m.Type}</p>
               </div>
             </div>
           ))}
