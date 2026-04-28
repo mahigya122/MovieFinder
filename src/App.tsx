@@ -20,19 +20,33 @@ function Moviesearch() {
   const [loading, setLoading] = useState<boolean>(false);
   //yo use garda const [query, setQuery] = useState<string>("movie")=> searche box ma default ma movie aayo so we place empty string
   const [query, setQuery] = useState<string>(""); //ask
+  const [hasSearched, setHasSearched] = useState<boolean>(false); 
 
   useEffect(() => {
+    // Right now you search even for "a" or empty string, so short queries are ignored.
+    if (query.length > 0 && query.length < 5) {
+      setMovies([]);
+      setTotalResults(0);
+      setHasSearched(false);
+      return;
+    }
+    const controller = new AbortController();   //This creates an AbortController, which is used to cancel (abort) ongoing operations,
+
+
+
     const fetchData = async () => {
       setLoading(true);
       try {
         const response = await fetch(
-          `https://www.omdbapi.com/?apikey=1e4f67a1&s=${query? query : "movie"}`
+          `https://www.omdbapi.com/?apikey=1e4f67a1&s=${query? query : "movie"}`,       //fetch(URL, OPTIONS)
+          { signal: controller.signal }
         );
         const data = await response.json();
 
         setMovies(data.Search || []);
         setTotalResults(Number(data.totalResults) || 0);
-        
+        setHasSearched(true);     // Set to true once a search is completed (even if no results are found)
+       
       } catch (error) {
         console.error(error);
       } finally {
@@ -41,6 +55,7 @@ function Moviesearch() {
     };
 
     fetchData();
+    return () => controller.abort();
   }, [query]);
 
   // for Sidebar (top movies)
@@ -72,11 +87,12 @@ function Moviesearch() {
 
       <div className="flex">
         <TopMovieList topMovies={topMovies} />
-        <Hero movies={movies} loading={loading} />
+        <Hero movies={movies} loading={loading} hasSearched={hasSearched} />
+
       </div>
 
     </div>
   );
 }
-        
+
 export default Moviesearch;

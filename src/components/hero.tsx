@@ -8,9 +8,10 @@ interface Movie {
 interface Props {
   movies: Movie[];
   loading: boolean;
+  hasSearched: boolean;
 }
 
-function Hero({ movies, loading }: Props) {
+function Hero({ movies, loading, hasSearched }: Props) {
 
   if (loading) {
     return (
@@ -27,7 +28,7 @@ function Hero({ movies, loading }: Props) {
     );
   } 
 
-  if (!loading && movies.length === 0) {             {/*means “not loading AND no movies found”*/}
+  if (!loading && hasSearched && movies.length === 0) {             {/*means “not loading AND no movies found”*/}
     return (
       <div className="flex flex-1 items-center justify-center bg-black">
         <p className="text-gray-400 text-lg">
