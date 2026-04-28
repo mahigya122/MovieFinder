@@ -73,7 +73,7 @@ function Moviesearch() {
       {/* NAVBAR */}
         
       <div className="flex w-full items-center justify-between gap-4 bg-gradient-to-r from-gray-800 via-gray-900 to-gray-800 p-4 text-white shadow-lg">
-        <h1 className="text-xl font-bold tracking-wide !text-white">
+        <h1 className="text-3xl font-bold tracking-wide !text-white">
           🎬 
         </h1>
 
@@ -94,7 +94,10 @@ function Moviesearch() {
       <div className="flex">
 
         {/* for SIDEBAR */}
-        <div className="hidden lg:block w-64 bg-white p-4 shadow-md">
+        <div className="hidden lg:block w-80 p-4 bg-black text-white border-r border-gray-800"> {/*hidden lg:block → only desktop shows sidebar
+             w-64 → fixed sidebar width
+             bg-black → Netflix style
+             border-r → separation line*/}
           <h2 className="font-bold mb-3">Top Movies</h2>
 
           {topMovies.map((m, i) => (
@@ -110,29 +113,39 @@ function Moviesearch() {
         </div>
 
         {/* MOVIES GRID */}
-        <div className="flex-1 p-4 overflow-y-auto bg-gray-100">
+        <div className="flex flex-col overflow-hidden rounded-xl
+          bg-[#111] text-white
+           shadow-md">
         <div
-          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-5 gap-3 auto-rows-auto
+          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-5 p-4 auto-rows-auto
         items-start"> {/*if i place auto-row-fr item-streach then the height of all the card will be same but it will overwrite image hight as well*/}
 
           {movies.map((m: Movie, i: number) => (
             <div
               key={i}
-              className="flex h-full flex-col overflow-hidden rounded-lg bg-white shadow-md transition duration-300 hover:shadow-lg w-56 h-80"
+              className="flex flex-col
+              overflow-hidden
+              rounded-xl
+            bg-[#111]
+            text-white
+              shadow-md
+              transition-all duration-300
+              hover:shadow-red-500/30
+              hover:scale-105"
             >
               <div className="aspect-[4/5] w-full bg-gray-100">  {/* aspect ratio helps us maintain consistancy between moviecard and image*/ }
               <img
                src={m.Poster}
                alt={m.Title}
-               className="block h-full w-full object-cover"
+               className="h-60 w-full object-cover"
                />
               </div>
             
 
               <div className="p-2">
-                <h2 className="truncate text-xs font-semibold">{m.Title}</h2>
-                <p className="text-xs text-gray-600">{m.Year}</p>
-                <p className="text-[11px] text-gray-400">{m.Type}</p>
+                <h2 className="truncate text-sm font-semibold">{m.Title}</h2>
+                <p className="text-xs text-gray-400">{m.Year}</p>
+                <p className="text-[11px] text-gray-500">{m.Type}</p>
               </div>
             </div>
           ))}
