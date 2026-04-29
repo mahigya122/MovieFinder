@@ -13,7 +13,7 @@ interface Movie {
 
 interface Props {
   movie: Movie | null;
-  onClose: () => void;
+  onClose: () => void;      //onClose function takes NO arguments it returns nothing (void) and is used to close the selected movie view or reset the selected movie data when triggered. 
 }
 
 function Selected({ movie, onClose }: Props) {
@@ -27,7 +27,7 @@ function Selected({ movie, onClose }: Props) {
   useEffect(() => {
     const stored = localStorage.getItem("reviews");
     if (stored) {
-      setSavedReviews(JSON.parse(stored));
+      setSavedReviews(JSON.parse(stored));      //Loads saved review data from localStorage (done by storing), converts it from string format into JavaScript objects using JSON.parse, and stores it in React state for rendering.
     }
   }, []);
 

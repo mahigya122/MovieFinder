@@ -51,7 +51,7 @@ function Hero({ movies, loading, hasSearched, onSelectMovie, selectedMovie, onCl
   const handleSaveReview = () => {
     if (!selectedMovie) return;
     const newReview = {
-      id: `${selectedMovie.imdbID}-${Date.now()}`,
+      id: `${selectedMovie.imdbID}-${Date.now()}`,     //This line is creating a unique ID string using the movie’s IMDb ID and the current time.
       movieId: selectedMovie.imdbID,
       title: selectedMovie.Title,
       rating,
@@ -192,7 +192,11 @@ function Hero({ movies, loading, hasSearched, onSelectMovie, selectedMovie, onCl
                 {[1, 2, 3, 4, 5].map((star) => (
                   <span
                     key={star}
-                    onClick={() => setRating(star)}
+                    //This is a click handler for a star rating UI (like 1–5 stars). It updates React state when the user clicks a star.
+                    onClick={() => {        //When this element (likely a star) is clicked, run this function.”It does NOT run immediately — only on click.
+                      setRating(star);     //This updates the selected rating value.
+                      setHover(0);         //This resets the hover state.
+                    }}
                     onMouseEnter={() => setHover(star)}
                     onMouseLeave={() => setHover(0)}
                     className="cursor-pointer text-2xl transition-transform hover:scale-110"

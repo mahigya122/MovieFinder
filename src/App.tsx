@@ -22,7 +22,7 @@ function Moviesearch() {
   //ask
   const [movies, setMovies] = useState<Movie[]>([]);
   const [totalResults, setTotalResults] = useState<number>(0);
-  const [topMovies, setTopMovies] = useState<Movie[]>([]);
+  //const [topMovies, setTopMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   //yo use garda const [query, setQuery] = useState<string>("movie")=> searche box ma default ma movie aayo so we place empty string
   const [query, setQuery] = useState<string>(""); //ask
@@ -67,6 +67,8 @@ function Moviesearch() {
     return () => controller.abort();
   }, [query]);
 
+
+   {/*
   // for Sidebar (top movies)
   useEffect(() => {
     const fetchTop = async () => {
@@ -84,6 +86,8 @@ function Moviesearch() {
 
     fetchTop();
   }, []);
+           */}
+
 
     // for MovieDetails when selected
     useEffect(() => {
@@ -116,14 +120,21 @@ function Moviesearch() {
       />
 
       <div className="flex">
-        <TopMovieList topMovies={topMovies} />
+
+        {/* <TopMovieList topMovies={topMovies} /> */}
+        <TopMovieList
+          onSelectMovie={(id: string) => setSelectedId(id)}    //This is a function being passed as a prop in React. It handles what happens when a movie is selected., When a movie is selected, take its ID which must be in string and store it as the currently selected movie ID
+        />
+
         <Hero
           movies={movies}
           loading={loading}
           hasSearched={hasSearched}
           onSelectMovie={(movie: Movie) => setSelectedId(movie.imdbID)}
           selectedMovie={selectedMovie}
-          onClose={() => setSelectedMovie(null)}
+          onClose={() =>{ 
+            setSelectedMovie(null);       //This is a callback function passed as a prop, usually used to close a modal or reset selected data.. When onClose is triggered (like clicking a close button), run this function...When the close action happens, clear both the selected movie data and its ID.
+            setSelectedId(null);}}
         />
       </div>
 
