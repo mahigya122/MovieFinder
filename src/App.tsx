@@ -29,6 +29,7 @@ function Moviesearch() {
   const [hasSearched, setHasSearched] = useState<boolean>(false); 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedMovie, setSelectedMovie] = useState<MovieDetails | null>(null);
+  const [reviewModeRequest, setReviewModeRequest] = useState<'auto' | 'edit'>('auto');
 
   // for search results
   useEffect(() => {
@@ -109,7 +110,16 @@ function Moviesearch() {
       fetchMovieDetails();
     }, [selectedId]);
    
-  
+  const handleReset = () => {
+    setQuery("");
+    setMovies([]);
+    setTotalResults(0);
+    setHasSearched(false);
+    setSelectedId(null);
+    setSelectedMovie(null);
+    setReviewModeRequest('auto');
+  };
+
   return (
     <div className="min-h-screen bg-black">
 
@@ -117,16 +127,20 @@ function Moviesearch() {
         query={query}
         setQuery={setQuery}
         totalResults={totalResults}
+        onReset={handleReset}
       />
 
       <div className="flex">
 
         {/* <TopMovieList topMovies={topMovies} /> */}
         <TopMovieList
-          onSelectMovie={(id: string) => setSelectedId(id)}
-          onWatchedMovieClick={(id: string) => {
+          onSelectMovie={(id: string) => {
+            setReviewModeRequest('auto');
             setSelectedId(id);
-            setTimeout(() => window.dispatchEvent(new Event('enterEditMode')), 0);
+          }}
+          onWatchedMovieClick={(id: string) => {
+            setReviewModeRequest('edit');
+            setSelectedId(id);
           }}
         />
 
@@ -134,11 +148,16 @@ function Moviesearch() {
           movies={movies}
           loading={loading}
           hasSearched={hasSearched}
-          onSelectMovie={(movie: Movie) => setSelectedId(movie.imdbID)}
+          onSelectMovie={(movie: Movie) => {
+            setReviewModeRequest('auto');
+            setSelectedId(movie.imdbID);
+          }}
+          reviewModeRequest={reviewModeRequest}
 
           selectedMovie={selectedMovie}
           onClose={() =>{ 
             setSelectedMovie(null);
+            setReviewModeRequest('auto');
             setSelectedId(null);}}
         />
       </div>

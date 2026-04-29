@@ -16,6 +16,7 @@ interface Props {
   loading: boolean;
   hasSearched: boolean;
   onSelectMovie: (movie: Movie) => void;   //onSelectMovie is a function that takes a movie and returns nothing
+  reviewModeRequest: 'auto' | 'edit';
   selectedMovie: MovieDetails | null;
   onClose: () => void;
 }
@@ -23,11 +24,12 @@ interface Props {
 import { useState, useEffect } from 'react';
 import StarRating from './starrating';
 
-function Hero({ movies, loading, hasSearched, onSelectMovie, selectedMovie, onClose }: Props) {
+function Hero({ movies, loading, hasSearched, onSelectMovie, reviewModeRequest, selectedMovie, onClose }: Props) {
   const [rating, setRating] = useState<number>(0);
   const [review, setReview] = useState<string>("");
   const [savedReviews, setSavedReviews] = useState<any[]>([]);
   const [mode, setMode] = useState<"new" | "view" | "edit">("new");
+  const [skipNextPrefill, setSkipNextPrefill] = useState<boolean>(false);
   
 
   useEffect(() => {
@@ -41,29 +43,26 @@ function Hero({ movies, loading, hasSearched, onSelectMovie, selectedMovie, onCl
     }
   }, []);
 
-  // Listen for edit mode event from watched list clicks
-  useEffect(() => {
-    const handleEnterEditMode = () => {
-      setMode("edit");
-    };
-    window.addEventListener('enterEditMode', handleEnterEditMode);
-    return () => window.removeEventListener('enterEditMode', handleEnterEditMode);
-  }, []);
 
- 
     // delete review function that takes reviewId and removes the review with that id from savedReviews state and also updates localStorage to reflect the change
   const handleDeleteReview = (reviewId: string) => {
     const updated = savedReviews.filter((item) => item.id !== reviewId);
     localStorage.setItem("reviews", JSON.stringify(updated));
     setSavedReviews(updated);
   };
+
      // save review function that creates a new review object with movie details, user rating, and review text, then saves it to localStorage and updates the savedReviews state. It also resets the review input and rating after saving.
-  const handleSaveReview = () => {
+   const handleSaveReview = () => {
     if (!selectedMovie) return;
+    const stableWatchedId = existingReview?.watched_id ?? `${selectedMovie.imdbID}-${Date.now()}`;
+    const stableId = existingReview?.id ?? stableWatchedId;
     const newReview = {
-      watched_id: `${selectedMovie.imdbID}-${Date.now()}`,     //This line is creating a unique ID string using the movie’s IMDb ID and the current time.
+      watched_id: stableWatchedId,     //Keep one review record per movie by preserving the same watched id.
+      id: stableId,
       movieId: selectedMovie.imdbID,
-      title: selectedMovie.Title,      poster: selectedMovie.Poster,      rating,
+      title: selectedMovie.Title,
+      poster: selectedMovie.Poster,
+      rating,
       review, 
       createdAt: new Date().toISOString(),     //turns a date into something like: 2026-04-29T04:30:15.123Z
       date: new Date().toLocaleDateString('en-US', {            //it show when the review was wriytten*
@@ -81,24 +80,26 @@ function Hero({ movies, loading, hasSearched, onSelectMovie, selectedMovie, onCl
     let updated;
 
     if (existingReview) {
-      // UPDATE existing review - preserve the original ID
+      // UPDATE existing review - preserve the original identity
       updated = existing.map((r: any) =>
-        r.movieId === selectedMovie.imdbID ? { ...newReview, id: r.id } : r
+        r.watched_id === existingReview.watched_id ? newReview : r
       );
+      setSkipNextPrefill(true);
       setMode("view");
+      setReview("");
+      setRating(0);
     } else {
       // NEW review
       updated = [...existing, newReview];
       setMode("view");
+      setReview("");
+      setRating(0);
     }
 
     localStorage.setItem("reviews", JSON.stringify(updated));
     setSavedReviews(updated);
 
     window.dispatchEvent(new Event("reviewsUpdated"));            //Manually send a custom event called reviewsUpdated to the whole browser window."
-
-    setReview("");
-    setRating(0);
   };
 
   // Get reviews for selected movie
@@ -110,16 +111,22 @@ function Hero({ movies, loading, hasSearched, onSelectMovie, selectedMovie, onCl
 
   useEffect(() => {
     if (!selectedMovie) return;
+
+    if (skipNextPrefill) {
+      setSkipNextPrefill(false);
+      return;
+    }
+
     if (existingReview) {
       setRating(existingReview.rating);
       setReview(existingReview.review);
-      setMode("view");
+      setMode(reviewModeRequest === 'edit' ? 'edit' : 'view');
     } else {
       setRating(0);
       setReview("");
       setMode("new");
     }
-  }, [selectedMovie, existingReview]);
+  }, [selectedMovie, existingReview, reviewModeRequest, skipNextPrefill]);
 
   if (loading) {
     return (
@@ -257,7 +264,6 @@ function Hero({ movies, loading, hasSearched, onSelectMovie, selectedMovie, onCl
                 <textarea
                   className="w-full mt-3 p-2 rounded bg-gray-800/50 text-white text-xs border border-gray-700 focus:border-red-600 focus:outline-none"
                   placeholder="Update your review..."
-                  value={review}
                   onChange={(e) => setReview(e.target.value)}
                   rows={3}
                 />

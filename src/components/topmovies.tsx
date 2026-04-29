@@ -65,16 +65,7 @@ function TopMovieList({ onWatchedMovieClick }: any) {
 
       if (stored) {
         const parsed = JSON.parse(stored);
-
-        // remove duplicates (keep latest per movie)
-        const unique = Object.values(
-          parsed.reduce((acc: any, item: Review) => {     //reduce() is transforming a list of reviews into a lookup object using movieId as keys for fast access.
-            acc[item.movieId] = item;
-            return acc;
-          }, {})
-        );
-
-        setWatched(unique as Review[]);
+        setWatched(parsed as Review[]);
       }
     };
 

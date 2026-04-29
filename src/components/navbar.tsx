@@ -3,10 +3,12 @@ interface NavbarProps {
   setQuery: (value: string) => void;
   totalResults: number;
 }
-function Navbar({ query, setQuery, totalResults }: NavbarProps) {
+function Navbar({ query, setQuery, totalResults, onReset }: NavbarProps & { onReset: () => void }) {
   return (
      <div className="flex w-full items-center justify-between gap-4 bg-gradient-to-r from-gray-800 via-gray-900 to-gray-800 p-4 text-white shadow-lg">
-        <h1 className="text-3xl font-bold tracking-wide !text-white">
+        <h1 
+        onClick={onReset}
+        className="text-3xl font-bold tracking-wide !text-white cursor-pointer">
           🎬 
         </h1>
 
@@ -20,8 +22,8 @@ function Navbar({ query, setQuery, totalResults }: NavbarProps) {
         <p className="text-sm whitespace-nowrap text-white">
           Results: {totalResults}
         </p>
-         </div>
-         );
+      </div>
+    );
 }
 
 export default Navbar;
