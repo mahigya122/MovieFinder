@@ -11,6 +11,12 @@ interface Movie {
   Poster: string;
 }
 
+interface MovieDetails extends Movie {
+  Plot: string;
+  imdbRating: string;
+  Runtime: string;
+}
+
 function Moviesearch() {
 
   //ask
@@ -21,10 +27,13 @@ function Moviesearch() {
   //yo use garda const [query, setQuery] = useState<string>("movie")=> searche box ma default ma movie aayo so we place empty string
   const [query, setQuery] = useState<string>(""); //ask
   const [hasSearched, setHasSearched] = useState<boolean>(false); 
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedMovie, setSelectedMovie] = useState<MovieDetails | null>(null);
 
+  // for search results
   useEffect(() => {
     // Right now you search even for "a" or empty string, so short queries are ignored.
-    if (query.length > 0 && query.length < 5) {
+    if (query.length > 0 && query.length < 3) {
       setMovies([]);
       setTotalResults(0);
       setHasSearched(false);
@@ -75,6 +84,27 @@ function Moviesearch() {
 
     fetchTop();
   }, []);
+
+    // for MovieDetails when selected
+    useEffect(() => {
+      if (!selectedId) return;  // If no movie is selected, we don't need to fetch details, so we exit early.
+      
+      const fetchMovieDetails = async () => {
+      try { 
+        const response = await fetch(
+          `https://www.omdbapi.com/?apikey=1e4f67a1&i=${selectedId}&plot=full`
+        );
+        const data = await response.json();
+
+        setSelectedMovie(data);              /* data.Search is only for search API; details API returns one movie object directly. */
+      }catch (error) {
+        console.error(error);
+      }
+    };
+      
+      fetchMovieDetails();
+    }, [selectedId]);
+   
   
   return (
     <div className="min-h-screen bg-black">
@@ -87,8 +117,14 @@ function Moviesearch() {
 
       <div className="flex">
         <TopMovieList topMovies={topMovies} />
-        <Hero movies={movies} loading={loading} hasSearched={hasSearched} />
-
+        <Hero
+          movies={movies}
+          loading={loading}
+          hasSearched={hasSearched}
+          onSelectMovie={(movie: Movie) => setSelectedId(movie.imdbID)}
+          selectedMovie={selectedMovie}
+          onClose={() => setSelectedMovie(null)}
+        />
       </div>
 
     </div>
