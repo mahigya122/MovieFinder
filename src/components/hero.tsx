@@ -21,17 +21,17 @@ interface Props {
 }
 
 import { useState, useEffect } from 'react';
+import StarRating from './starrating';
 
 function Hero({ movies, loading, hasSearched, onSelectMovie, selectedMovie, onClose }: Props) {
   const [rating, setRating] = useState<number>(0);
-  const [hover, setHover] = useState<number>(0);
   const [review, setReview] = useState<string>("");
   const [savedReviews, setSavedReviews] = useState<any[]>([]);
+  const [mode, setMode] = useState<"new" | "view" | "edit">("new");
+  
 
-  // load saved reviews
   useEffect(() => {
     const stored = localStorage.getItem("reviews");
-    //this show what reviews are saved in local storage and we parse it to get the actual data structure (array of reviews) and set it to state so we can use it in our component
     if (stored) {
       const parsedReviews = JSON.parse(stored).map((item: any, index: number) => ({
         ...item,
@@ -41,6 +41,16 @@ function Hero({ movies, loading, hasSearched, onSelectMovie, selectedMovie, onCl
     }
   }, []);
 
+  // Listen for edit mode event from watched list clicks
+  useEffect(() => {
+    const handleEnterEditMode = () => {
+      setMode("edit");
+    };
+    window.addEventListener('enterEditMode', handleEnterEditMode);
+    return () => window.removeEventListener('enterEditMode', handleEnterEditMode);
+  }, []);
+
+ 
     // delete review function that takes reviewId and removes the review with that id from savedReviews state and also updates localStorage to reflect the change
   const handleDeleteReview = (reviewId: string) => {
     const updated = savedReviews.filter((item) => item.id !== reviewId);
@@ -51,12 +61,11 @@ function Hero({ movies, loading, hasSearched, onSelectMovie, selectedMovie, onCl
   const handleSaveReview = () => {
     if (!selectedMovie) return;
     const newReview = {
-      id: `${selectedMovie.imdbID}-${Date.now()}`,     //This line is creating a unique ID string using the movie’s IMDb ID and the current time.
+      watched_id: `${selectedMovie.imdbID}-${Date.now()}`,     //This line is creating a unique ID string using the movie’s IMDb ID and the current time.
       movieId: selectedMovie.imdbID,
-      title: selectedMovie.Title,
-      rating,
-      review,
-      createdAt: new Date().toISOString(),
+      title: selectedMovie.Title,      poster: selectedMovie.Poster,      rating,
+      review, 
+      createdAt: new Date().toISOString(),     //turns a date into something like: 2026-04-29T04:30:15.123Z
       date: new Date().toLocaleDateString('en-US', {            //it show when the review was wriytten*
         year: 'numeric',
         month: 'short',
@@ -68,19 +77,49 @@ function Hero({ movies, loading, hasSearched, onSelectMovie, selectedMovie, onCl
 
     const stored = localStorage.getItem("reviews");
     const existing = stored ? JSON.parse(stored) : [];
-    const updated = [...existing, newReview];
+
+    let updated;
+
+    if (existingReview) {
+      // UPDATE existing review - preserve the original ID
+      updated = existing.map((r: any) =>
+        r.movieId === selectedMovie.imdbID ? { ...newReview, id: r.id } : r
+      );
+      setMode("view");
+    } else {
+      // NEW review
+      updated = [...existing, newReview];
+      setMode("view");
+    }
 
     localStorage.setItem("reviews", JSON.stringify(updated));
     setSavedReviews(updated);
 
-    setReview("");           {/*whatever user typed in review box gets cleared and Resets rating back to zero */}
+    window.dispatchEvent(new Event("reviewsUpdated"));            //Manually send a custom event called reviewsUpdated to the whole browser window."
+
+    setReview("");
     setRating(0);
   };
 
   // Get reviews for selected movie
   const reviewsForMovie = selectedMovie
     ? savedReviews.filter((r) => r.movieId === selectedMovie.imdbID)
-    : [];
+    : [];   {/*If there is a selected movie, filter saved reviews to get only those that match the selected movie’s ID. If no movie is selected, use an empty list.*/}
+
+  const existingReview = reviewsForMovie[0] ?? null; //Take the first review from the array, and if it doesn’t exist, use null instead.
+
+  useEffect(() => {
+    if (!selectedMovie) return;
+    if (existingReview) {
+      setRating(existingReview.rating);
+      setReview(existingReview.review);
+      setMode("view");
+    } else {
+      setRating(0);
+      setReview("");
+      setMode("new");
+    }
+  }, [selectedMovie, existingReview]);
 
   if (loading) {
     return (
@@ -185,45 +224,71 @@ function Hero({ movies, loading, hasSearched, onSelectMovie, selectedMovie, onCl
             {/* Divider */}
             <div className="border-t border-gray-700"></div>
 
-            {/* Your Rating = lets me hover and rate movies from star*/}
-            <div>
-              <h3 className="font-semibold text-sm mb-2 text-gray-300">Your Rating</h3>
-              <div className="flex gap-2">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <span
-                    key={star}
-                    //This is a click handler for a star rating UI (like 1–5 stars). It updates React state when the user clicks a star.
-                   // onClick={() => {        //When this element (likely a star) is clicked, run this function.”It does NOT run immediately — only on click.
-                     // setRating(star);     //This updates the selected rating value.
-                     // setHover(0);         //This resets the hover state.
-                    // }}   
-                    onMouseEnter={() => setHover(star)}             //This runs when your mouse hovers over an element. It sets the hover state to the current star
-                    //onMouseLeave={() => setHover(0)}           //This runs when your mouse leaves the element. It resets the hover state back to the saved rating keeps last selected rating stable and flicking stops when we use rating insted of 0
-                    className="cursor-pointer text-2xl transition-transform hover:scale-110"
-                  >
-                    {star <= (hover > 0 ? hover : rating) ? "⭐" : "☆"}    {/*ALL stars" <= "hover become active and > 0 ? tells=Fill all stars up to the hovered value (if hovering), otherwise fill up to the saved rating*/}
-                  </span>
-                ))}
-              </div>
-            </div>
+            {/* Review Section - 3 Modes: new, view, edit */}
+            {mode === "view" && existingReview ? (
+              <div className="space-y-3">
+                <div>
+                  <h3 className="font-semibold text-sm text-gray-300">✅ Already Watched</h3>
+                  <p className="text-xs text-gray-400 mt-1">(Click from watched list to edit)</p>
+                </div>
 
-            {/* Review Textarea */}
-            <div>
-              <h3 className="font-semibold text-sm mb-2 text-gray-300">Write Review</h3>
-              <textarea
-                className="w-full p-2 rounded bg-gray-800/50 text-white text-xs border border-gray-700 focus:border-red-600 focus:outline-none"
-                placeholder="Share your thoughts..."
-                value={review}
-                onChange={(e) => setReview(e.target.value)}
-                rows={3}
-              />
-              <button
-                onClick={handleSaveReview}
-                className="w-full mt-2 px-3 py-2 bg-red-600 hover:bg-red-700 rounded font-semibold text-sm transition-colors"
-              >
-                Save Review
-              </button>
-            </div>
+                <div className="text-yellow-400 text-lg">
+                  {"⭐".repeat(existingReview.rating)}
+                </div>
+
+                <p className="text-sm text-gray-300">{existingReview.review}</p>
+
+                <p className="text-xs text-gray-500">{existingReview.date}</p>
+              </div>
+            ) : mode === "edit" && existingReview ? (
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="font-semibold text-sm text-gray-300">✏️ Edit Review</h3>
+                  <button
+                    onClick={() => setMode("view")}
+                    className="text-xs px-2 py-1 rounded bg-gray-700 hover:bg-gray-600 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+
+                <StarRating value={rating} onChange={setRating} />
+
+                <textarea
+                  className="w-full mt-3 p-2 rounded bg-gray-800/50 text-white text-xs border border-gray-700 focus:border-red-600 focus:outline-none"
+                  placeholder="Update your review..."
+                  value={review}
+                  onChange={(e) => setReview(e.target.value)}
+                  rows={3}
+                />
+                <button
+                  onClick={handleSaveReview}
+                  className="w-full mt-2 px-3 py-2 bg-red-600 hover:bg-red-700 rounded font-semibold text-sm transition-colors"
+                >
+                  Update Review
+                </button>
+              </div>
+            ) : (
+              <div>
+                <h3 className="font-semibold text-sm mb-2 text-gray-300">📝 Write Review</h3>
+
+                <StarRating value={rating} onChange={setRating} />
+
+                <textarea
+                  className="w-full mt-3 p-2 rounded bg-gray-800/50 text-white text-xs border border-gray-700 focus:border-red-600 focus:outline-none"
+                  placeholder="Share your thoughts..."
+                  value={review}
+                  onChange={(e) => setReview(e.target.value)}
+                  rows={3}
+                />
+                <button
+                  onClick={handleSaveReview}
+                  className="w-full mt-2 px-3 py-2 bg-red-600 hover:bg-red-700 rounded font-semibold text-sm transition-colors"
+                >
+                  Save Review
+                </button>
+              </div>
+            )}
 
             {/* Saved Reviews */}
             {reviewsForMovie.length > 0 && (
@@ -234,7 +299,7 @@ function Hero({ movies, loading, hasSearched, onSelectMovie, selectedMovie, onCl
                   {/* review boxes for each review */}
                   {reviewsForMovie.map((r, idx) => (
                     <div key={r.id || idx} className="bg-gray-800/40 border border-gray-700 p-2 rounded relative">
-
+                          
                       <button
                         type="button"
                         onClick={() => handleDeleteReview(r.id || `${r.movieId}-${idx}`)}         // This runs a delete function on click, passing either the review’s real ID or a fallback ID made from movie ID and index.

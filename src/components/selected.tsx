@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import StarRating from './starrating';
 
 interface Movie {
   Title: string;
@@ -19,7 +20,6 @@ interface Props {
 function Selected({ movie, onClose }: Props) {
 
   const [rating, setRating] = useState<number>(0);
-  const [hover, setHover] = useState<number>(0);
   const [review, setReview] = useState<string>(""); 
   const [savedReviews, setSavedReviews] = useState<any[]>([]);
 
@@ -92,19 +92,7 @@ function Selected({ movie, onClose }: Props) {
       </p>
 
       {/* Stars system for reviews */}
-      <div className="flex gap-1 mt-3">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <span
-            key={star}
-            onClick={() => setRating(star)}
-            onMouseEnter={() => setHover(star)}
-            onMouseLeave={() => setHover(0)}
-            className="cursor-pointer text-2xl"
-          >
-            {star <= (hover || rating) ? "⭐" : "☆"}
-          </span>
-        ))}
-      </div>
+      <StarRating value={rating} onChange={setRating} />   {/*taked value from starrating.tsx8*/}
 
       {/* Review input */}
       <textarea

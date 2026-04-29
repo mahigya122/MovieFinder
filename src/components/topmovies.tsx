@@ -56,25 +56,31 @@ interface Review {
   createdAt: string;    // ISO timestamp
 }
 
-function TopMovieList({ onSelectMovie }: any) {
+function TopMovieList({ onWatchedMovieClick }: any) {
   const [watched, setWatched] = useState<any[]>([]);
 
   useEffect(() => {
-    const stored = localStorage.getItem("reviews");
+    const load = () => {
+      const stored = localStorage.getItem("reviews");
 
-    if (stored) {
-      const parsed = JSON.parse(stored);
+      if (stored) {
+        const parsed = JSON.parse(stored);
 
-      // remove duplicates (keep latest per movie)
-      const unique = Object.values(
-        parsed.reduce((acc: any, item: Review) => {     //reduce() is transforming a list of reviews into a lookup object using movieId as keys for fast access.
-          acc[item.movieId] = item;
-          return acc;
-        }, {})
-      );
+        // remove duplicates (keep latest per movie)
+        const unique = Object.values(
+          parsed.reduce((acc: any, item: Review) => {     //reduce() is transforming a list of reviews into a lookup object using movieId as keys for fast access.
+            acc[item.movieId] = item;
+            return acc;
+          }, {})
+        );
 
-      setWatched(unique as Review[]);
-    }
+        setWatched(unique as Review[]);
+      }
+    };
+
+    load();
+    window.addEventListener("reviewsUpdated", load);
+    return() => window.removeEventListener("reviewsUpdated", load);   //cleanup function to remove event listener when component unmounts
   }, []);
 
    return (
@@ -83,9 +89,9 @@ function TopMovieList({ onSelectMovie }: any) {
         {/*Loop through all watched movies and render UI for each one. i.e Renders a fully interactive UI card*/}
       {watched.map((m) => (
         <div
-          key={m.movieId}                    //m = one movie object It runs once for each movie and m.movieId is Unique identifier for React
-          onClick={() => onSelectMovie(m.movieId)}
-          className="flex gap-2 mb-3 items-center cursor-pointer hover:bg-gray-800 p-2 rounded"   //flex → horizontal layout gap-2 → space between image and text ,mb-3 → margin bottom, items-center → vertically center, cursor-pointer → show hand cursor, hover:bg-gray-800 → highlight on hover, p-2 → padding, rounded → rounded corners  === Makes it look like a clickable card.
+          key={m.movieId}
+          onClick={() => onWatchedMovieClick(m.movieId)}
+          className="flex gap-2 mb-3 items-center cursor-pointer hover:bg-gray-800 p-2 rounded"
         >
           <img src={m.poster} className="w-10 h-14 object-cover" />   {/*object-cover keeps image ratio clean*/}
           <div>

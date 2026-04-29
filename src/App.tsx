@@ -123,7 +123,11 @@ function Moviesearch() {
 
         {/* <TopMovieList topMovies={topMovies} /> */}
         <TopMovieList
-          onSelectMovie={(id: string) => setSelectedId(id)}    //This is a function being passed as a prop in React. It handles what happens when a movie is selected., When a movie is selected, take its ID which must be in string and store it as the currently selected movie ID
+          onSelectMovie={(id: string) => setSelectedId(id)}
+          onWatchedMovieClick={(id: string) => {
+            setSelectedId(id);
+            setTimeout(() => window.dispatchEvent(new Event('enterEditMode')), 0);
+          }}
         />
 
         <Hero
@@ -131,9 +135,10 @@ function Moviesearch() {
           loading={loading}
           hasSearched={hasSearched}
           onSelectMovie={(movie: Movie) => setSelectedId(movie.imdbID)}
+
           selectedMovie={selectedMovie}
           onClose={() =>{ 
-            setSelectedMovie(null);       //This is a callback function passed as a prop, usually used to close a modal or reset selected data.. When onClose is triggered (like clicking a close button), run this function...When the close action happens, clear both the selected movie data and its ID.
+            setSelectedMovie(null);
             setSelectedId(null);}}
         />
       </div>
