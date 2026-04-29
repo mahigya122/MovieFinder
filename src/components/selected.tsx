@@ -127,7 +127,8 @@ function Selected({ movie, onClose }: Props) {
         <div className="mt-4">
           <h3 className="font-semibold mb-2">Saved Reviews</h3>
           <ul className="space-y-3">
-            {reviewsForMovie.map((r, idx) => (
+            {/*creates a list of reviews UI i.e.Renders a simple list item*/}
+            {reviewsForMovie.map((r, idx) => (                         //r is just a variable name. It represents one item inside the array you are looping over. and idx = index (position in array)
               <li key={idx} className="bg-gray-900 p-3 rounded">
                 <div className="flex items-center justify-between">
                   <strong>{r.title}</strong>

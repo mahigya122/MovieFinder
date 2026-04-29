@@ -185,7 +185,7 @@ function Hero({ movies, loading, hasSearched, onSelectMovie, selectedMovie, onCl
             {/* Divider */}
             <div className="border-t border-gray-700"></div>
 
-            {/* Your Rating */}
+            {/* Your Rating = lets me hover and rate movies from star*/}
             <div>
               <h3 className="font-semibold text-sm mb-2 text-gray-300">Your Rating</h3>
               <div className="flex gap-2">
@@ -193,15 +193,15 @@ function Hero({ movies, loading, hasSearched, onSelectMovie, selectedMovie, onCl
                   <span
                     key={star}
                     //This is a click handler for a star rating UI (like 1–5 stars). It updates React state when the user clicks a star.
-                    onClick={() => {        //When this element (likely a star) is clicked, run this function.”It does NOT run immediately — only on click.
-                      setRating(star);     //This updates the selected rating value.
-                      setHover(0);         //This resets the hover state.
-                    }}
-                    onMouseEnter={() => setHover(star)}
-                    onMouseLeave={() => setHover(0)}
+                   // onClick={() => {        //When this element (likely a star) is clicked, run this function.”It does NOT run immediately — only on click.
+                     // setRating(star);     //This updates the selected rating value.
+                     // setHover(0);         //This resets the hover state.
+                    // }}   
+                    onMouseEnter={() => setHover(star)}             //This runs when your mouse hovers over an element. It sets the hover state to the current star
+                    //onMouseLeave={() => setHover(0)}           //This runs when your mouse leaves the element. It resets the hover state back to the saved rating keeps last selected rating stable and flicking stops when we use rating insted of 0
                     className="cursor-pointer text-2xl transition-transform hover:scale-110"
                   >
-                    {star <= (hover || rating) ? "⭐" : "☆"}
+                    {star <= (hover > 0 ? hover : rating) ? "⭐" : "☆"}    {/*ALL stars" <= "hover become active and > 0 ? tells=Fill all stars up to the hovered value (if hovering), otherwise fill up to the saved rating*/}
                   </span>
                 ))}
               </div>
